@@ -1,0 +1,5 @@
+/.backup/
+/venv/
+scrapy_fastapi.session.sql
+scrapper.code-workspace
+**/__pycache__/
