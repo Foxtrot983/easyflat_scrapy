@@ -2,6 +2,8 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
+# Добавить main_item["phoneNumber"] на neagent, realt %Там не отображает телефонный номер%
+
 
 import scrapy
 
@@ -15,11 +17,11 @@ class ScrapyMainItem(scrapy.Item):
     agency = scrapy.Field()
     description = scrapy.Field()
     marketplace_id = scrapy.Field()
-    marketplace = scrapy.Field()
-    photo = scrapy.Field()
     location_a = scrapy.Field()
     location_b = scrapy.Field()
+    phoneNumber = scrapy.Field()
 
 class ScrapyPhotoItem(scrapy.Item):
     image = scrapy.Field()
     house_id = scrapy.Field()
+    url = scrapy.Field()

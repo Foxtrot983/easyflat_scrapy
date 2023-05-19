@@ -102,3 +102,25 @@ FAKEUSERAGENT_PROVIDERS = [
     'scrapy_fake_useragent.providers.FakerProvider',  # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
     'scrapy_fake_useragent.providers.FixedUserAgentProvider',  # fall back to USER_AGENT value
 ]
+
+ITEM_PIPELINES = {
+    "scrapRealt.pipelines.SaveHousePipelines": 300,
+}
+
+DUPEFILTER_DEBUG = True
+
+#selenium
+'''
+from shutil import which
+
+DOWNLOADER_MIDDLEWARES['scrapy_selenium.SeleniumMiddleware'] = 800
+
+SELENIUM_DRIVER_NAME = 'firefox'
+SELENIUM_DRIVER_EXECUTABLE_PATH = which('geckodriver')
+SELENIUM_DRIVER_ARGUMENTS=['-headless'] # '--headless' if using chrome instead of firefox
+
+SELENIUM_BROWSER_EXECUTABLE_PATH = which('firefox')'''
+
+
+RANDOMIZE_DOWNLOAD_DELAY = True
+DOWNLOAD_DELAY = 0.5

@@ -5,10 +5,14 @@
 
 
 # useful for handling different item types with a single interface
+from types import NoneType
 from itemadapter import ItemAdapter
 from .models import db_connect, create_table, House, HousePhoto
+from .items import ScrapyMainItem, ScrapyPhotoItem
 from sqlalchemy.orm import sessionmaker 
+from scrapy.exceptions import DropItem
 
+from sqlalchemy.exc import IntegrityError
 
 '''
 class ScrapRealtPipeline:
@@ -56,36 +60,85 @@ class SaveOnlinerPipelines:
     '''
 
 
+class SaveHousePipelines:
+    def __init__(self):
+        engine = db_connect()
+        create_table(engine)
+        self.session = sessionmaker(bind=engine)
+    
+    def spider_closed(self, spider):
+        self.session.close()
+
+
+
+    def process_item(self, item, spider):
+        session = self.session()
+        house = House()
+        house_photo = HousePhoto()
+        #print(f"TESTTTTT {type(item)} | {type(item['url'])}")
+        #print(item["url"])
+        
+        #print(exist_house)
+        #print(f"TEST EXIST {type(exist_house)}")
+        try:
+            if isinstance(item, ScrapyMainItem):
+                exist_house = session.query(House).filter_by(url = str(item['url'])).first()
+                print("Instance House")
+                if exist_house is None:
+                    house = House(**item)
+                    session.add(house)
+                    session.commit()
+                    print("add done")
+
+            if isinstance(item, ScrapyPhotoItem):
+                print("Instance HousePhoto")
+                exist_house = session.query(House).filter_by(url = str(item['url'])).first()
+                if exist_house is not None:
+                    house_photo = HousePhoto()
+                    house_photo.house_id = exist_house.id
+                    house_photo.image = item['image']
+                    session.add(house_photo)
+                    session.commit()
+                    
+        except DropItem:
+            print("Item was dropped")
+            session.rollback()
+        
+        except IntegrityError:
+            print("Item already exists")
+            session.rollback()
+        
+        finally:
+            session.close()
+            print('session closed')
+
+        return item
+    
+'''
 class SaveItemPipelines:
     def __init__(self):
         engine = db_connect()
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
 
-        self.house = House 
         self.house_photo = HousePhoto
         
     
     def process_item(self, item, spider):
         session = self.Session()
 
-        #house = House 
-        #house_photo = HousePhoto
-        #marketplace = Marketplace
-        house_db = self.house
         house_photo_db = self.house_photo
-        #marketplace_db = self.marketplace
-
-        house_db.amountUSD = item["amountUSD"]
-        house_db.amountBYN = item["amountBYN"]
-        house_db.rent_rooms = item["rent_rooms"]
-        house_db.address = item["address"]
-        house_db.url = item["url"]
-        house_db.created_at = item["created_at"]
-        house_db.agency = item["agency"]
-        house_db.description = item["description"]
-        house_db.marketplace_id = item["marketplace_id"]
-        house_db.marketplace = item["marketplace"]
-
-        house_photo_db.house_id = item['house_id']
-        house_photo_db.image = item["image"]
+        
+        house_photo_db.house_id: int = item['house_id']
+        house_photo_db.image: str = item["image"]
+        
+        try:
+            session.add(house_photo_db)
+            session.commit()
+        except:
+            session.rollback()
+        finally:
+            session.close()
+            
+            return item'''
+        
